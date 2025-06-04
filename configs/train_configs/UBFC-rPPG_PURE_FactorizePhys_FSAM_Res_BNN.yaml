@@ -11,7 +11,7 @@ TRAIN:
     DATASET: UBFC-rPPG
     DO_PREPROCESS: True                    # if first time, should be true
     DATA_FORMAT: NCDHW
-    DATA_PATH: "RawData"                     # Raw dataset path, need to be updated
+    DATA_PATH: "/kaggle/input/ubfc-rppg-dataset"                     # Raw dataset path, need to be updated
     CACHED_PATH: ""    # Processed dataset save path, need to be updated
     EXP_DATA_NAME: ""
     BEGIN: 0.0
@@ -40,7 +40,7 @@ VALID:
     DATASET: UBFC-rPPG
     DO_PREPROCESS: true                    # if first time, should be true
     DATA_FORMAT: NCDHW
-    DATA_PATH: "RawData"                     # Raw dataset path, need to be updated
+    DATA_PATH: "/kaggle/input/ubfc-rppg-dataset"                     # Raw dataset path, need to be updated
     CACHED_PATH: ""    # Processed dataset save path, need to be updated
     EXP_DATA_NAME: ""
     BEGIN: 0.8
