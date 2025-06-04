@@ -382,5 +382,9 @@ def gather_kl_divergence(model):
     kl_sum = 0.0
     for module in model.modules():
         if hasattr(module, 'kl_divergence'):
-            kl_sum += module.kl_divergence
+            # Check if kl_divergence is a method (callable) or a property/attribute
+            if callable(module.kl_divergence):
+                kl_sum += module.kl_divergence()
+            else:
+                kl_sum += module.kl_divergence
     return kl_sum 
