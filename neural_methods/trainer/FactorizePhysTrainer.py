@@ -171,6 +171,10 @@ class FactorizePhysTrainer(BaseTrainer):
                 else:
                     pred_ppg = self.model(data)
                 
+                # Make sure prediction has the same length as labels
+                if pred_ppg.shape[1] != labels.shape[1]:
+                    pred_ppg = pred_ppg[:, :labels.shape[1]]
+                
                 pred_ppg = (pred_ppg - torch.mean(pred_ppg)) / torch.std(pred_ppg)  # normalize
 
                 # Calculate standard loss
@@ -297,6 +301,10 @@ class FactorizePhysTrainer(BaseTrainer):
                     else:
                         pred_ppg = self.model(data)
                 
+                # Make sure prediction has the same length as labels
+                if pred_ppg.shape[1] != labels.shape[1]:
+                    pred_ppg = pred_ppg[:, :labels.shape[1]]
+                
                 pred_ppg = (pred_ppg - torch.mean(pred_ppg)) / torch.std(pred_ppg)  # normalize
                 loss = self.criterion(pred_ppg, labels)
                 valid_loss.append(loss.item())
@@ -368,10 +376,20 @@ class FactorizePhysTrainer(BaseTrainer):
                     else:
                         det_pred_ppg = self.model(data)
                 
+                # Make sure prediction has the same length as label
+                if det_pred_ppg.shape[1] != label.shape[1]:
+                    det_pred_ppg = det_pred_ppg[:, :label.shape[1]]
+                
                 # If BNN is enabled, run Monte Carlo sampling for uncertainty estimation
                 if self.enable_bnn and hasattr(self.model.module, 'monte_carlo_forward'):
                     # Run multiple forward passes
                     mc_samples = self.model.module.monte_carlo_forward(data, n_samples=self.bnn_samples)
+                    
+                    # Make sure samples have the same length as label
+                    label_length = label.shape[1]
+                    for i in range(len(mc_samples)):
+                        if mc_samples[i].shape[1] > label_length:
+                            mc_samples[i] = mc_samples[i][:, :label_length]
                 
                 # Prepare for storing in predictions dictionary
                 if self.config.TEST.OUTPUT_SAVE_DIR:
