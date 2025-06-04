@@ -174,6 +174,11 @@ class BayesianConv3d(ModuleWrapper):
         prior_pi = torch.tensor(self.prior_pi, device=mu.device)
         
         # Calculate components for the KL divergence formula
+        # Reshape prior parameters to ensure proper broadcasting
+        prior_sigma2_1 = prior_sigma2_1.expand_as(sigma2)
+        prior_sigma2_2 = prior_sigma2_2.expand_as(sigma2)
+        prior_pi = prior_pi.expand_as(sigma2)
+        
         kl_component_1 = torch.log(prior_pi / torch.sqrt(prior_sigma2_1) + 
                                   (1 - prior_pi) / torch.sqrt(prior_sigma2_2))
         kl_component_1 -= torch.log(1.0 / torch.sqrt(sigma2))
@@ -346,6 +351,11 @@ class BayesianLinear(ModuleWrapper):
         prior_pi = torch.tensor(self.prior_pi, device=mu.device)
         
         # Calculate components for the KL divergence formula
+        # Reshape prior parameters to ensure proper broadcasting
+        prior_sigma2_1 = prior_sigma2_1.expand_as(sigma2)
+        prior_sigma2_2 = prior_sigma2_2.expand_as(sigma2)
+        prior_pi = prior_pi.expand_as(sigma2)
+        
         kl_component_1 = torch.log(prior_pi / torch.sqrt(prior_sigma2_1) + 
                                   (1 - prior_pi) / torch.sqrt(prior_sigma2_2))
         kl_component_1 -= torch.log(1.0 / torch.sqrt(sigma2))
