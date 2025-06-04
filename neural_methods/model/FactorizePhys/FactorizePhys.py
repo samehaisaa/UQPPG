@@ -434,4 +434,5 @@ class FactorizePhys(nn.Module):
         if not self.enable_bnn:
             return torch.tensor(0.0).to(next(self.parameters()).device)
         
+        # Get KL divergence from all Bayesian layers
         return gather_kl_divergence(self)
