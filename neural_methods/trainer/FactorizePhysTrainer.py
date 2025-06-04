@@ -167,9 +167,9 @@ class FactorizePhysTrainer(BaseTrainer):
                 
                 # Forward pass - depends on model output format
                 if self.model.training and self.use_fsam:
-                    pred_ppg, vox_embed, factorized_embed, appx_error = self.model(data)
+                    pred_ppg, factorized_embed, appx_error = self.model(data)
                 else:
-                    pred_ppg, vox_embed = self.model(data)
+                    pred_ppg = self.model(data)
                 
                 pred_ppg = (pred_ppg - torch.mean(pred_ppg)) / torch.std(pred_ppg)  # normalize
 
@@ -281,21 +281,21 @@ class FactorizePhysTrainer(BaseTrainer):
                 if self.enable_bnn:
                     if hasattr(self.model.module, 'deterministic_forward'):
                         if self.use_fsam:
-                            pred_ppg, _, _, _ = self.model.module.deterministic_forward(data)
+                            pred_ppg, _, _ = self.model.module.deterministic_forward(data)
                         else:
-                            pred_ppg, _ = self.model.module.deterministic_forward(data)
+                            pred_ppg = self.model.module.deterministic_forward(data)
                     else:
                         # Fallback to regular forward if deterministic not available
                         if self.model.training and self.use_fsam:
-                            pred_ppg, _, _, _ = self.model(data)
+                            pred_ppg, _, _ = self.model(data)
                         else:
-                            pred_ppg, _ = self.model(data)
+                            pred_ppg = self.model(data)
                 else:
                     # Standard forward pass
                     if self.model.training and self.use_fsam:
-                        pred_ppg, _, _, _ = self.model(data)
+                        pred_ppg, _, _ = self.model(data)
                     else:
-                        pred_ppg, _ = self.model(data)
+                        pred_ppg = self.model(data)
                 
                 pred_ppg = (pred_ppg - torch.mean(pred_ppg)) / torch.std(pred_ppg)  # normalize
                 loss = self.criterion(pred_ppg, labels)
@@ -352,21 +352,21 @@ class FactorizePhysTrainer(BaseTrainer):
                 if self.enable_bnn:
                     if hasattr(self.model.module, 'deterministic_forward'):
                         if self.use_fsam:
-                            det_pred_ppg, _, _, _ = self.model.module.deterministic_forward(data)
+                            det_pred_ppg, _, _ = self.model.module.deterministic_forward(data)
                         else:
-                            det_pred_ppg, _ = self.model.module.deterministic_forward(data)
+                            det_pred_ppg = self.model.module.deterministic_forward(data)
                     else:
                         # Fallback
                         if self.use_fsam:
-                            det_pred_ppg, _, _, _ = self.model(data)
+                            det_pred_ppg, _, _ = self.model(data)
                         else:
-                            det_pred_ppg, _ = self.model(data)
+                            det_pred_ppg = self.model(data)
                 else:
                     # Standard model
                     if self.use_fsam:
-                        det_pred_ppg, _, _, _ = self.model(data)
+                        det_pred_ppg, _, _ = self.model(data)
                     else:
-                        det_pred_ppg, _ = self.model(data)
+                        det_pred_ppg = self.model(data)
                 
                 # If BNN is enabled, run Monte Carlo sampling for uncertainty estimation
                 if self.enable_bnn and hasattr(self.model.module, 'monte_carlo_forward'):
