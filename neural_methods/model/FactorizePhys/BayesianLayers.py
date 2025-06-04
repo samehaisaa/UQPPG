@@ -169,12 +169,13 @@ class BayesianConv3d(ModuleWrapper):
         
         # Prior: mixture of two Gaussians with different variances
         # p(w) = π * N(0, σ₁²) + (1-π) * N(0, σ₂²)
-        prior_sigma2_1 = self.prior_sigma_1 ** 2
-        prior_sigma2_2 = self.prior_sigma_2 ** 2
+        prior_sigma2_1 = torch.tensor(self.prior_sigma_1 ** 2, device=mu.device)
+        prior_sigma2_2 = torch.tensor(self.prior_sigma_2 ** 2, device=mu.device)
+        prior_pi = torch.tensor(self.prior_pi, device=mu.device)
         
         # Calculate components for the KL divergence formula
-        kl_component_1 = torch.log(self.prior_pi / torch.sqrt(prior_sigma2_1) + 
-                                  (1 - self.prior_pi) / torch.sqrt(prior_sigma2_2))
+        kl_component_1 = torch.log(prior_pi / torch.sqrt(prior_sigma2_1) + 
+                                  (1 - prior_pi) / torch.sqrt(prior_sigma2_2))
         kl_component_1 -= torch.log(1.0 / torch.sqrt(sigma2))
         
         kl_component_2 = 0.5 * (log_sigma2 + (mu ** 2 + sigma2) / prior_sigma2_1)
@@ -184,8 +185,8 @@ class BayesianConv3d(ModuleWrapper):
         # We directly calculate log(π * exp(-0.5 * ((μ²+σ²)/σ₁² + log(σ₁²))) + (1-π) * exp(-0.5 * ((μ²+σ²)/σ₂² + log(σ₂²))))
         kl_component_mix = torch.logsumexp(
             torch.stack([
-                torch.log(torch.tensor(self.prior_pi)) - kl_component_2,
-                torch.log(torch.tensor(1 - self.prior_pi)) - kl_component_3
+                torch.log(prior_pi) - kl_component_2,
+                torch.log(1 - prior_pi) - kl_component_3
             ]),
             dim=0
         )
@@ -334,24 +335,30 @@ class BayesianLinear(ModuleWrapper):
     
     def _kl_normal_mixture(self, mu, sigma):
         """KL divergence between posterior N(μ,σ²) and prior mixture of Gaussians"""
-        # Same implementation as in BayesianConv3d
+        # log[q(w|θ)/p(w)]
         sigma2 = sigma ** 2
         log_sigma2 = torch.log(sigma2)
         
-        prior_sigma2_1 = self.prior_sigma_1 ** 2
-        prior_sigma2_2 = self.prior_sigma_2 ** 2
+        # Prior: mixture of two Gaussians with different variances
+        # p(w) = π * N(0, σ₁²) + (1-π) * N(0, σ₂²)
+        prior_sigma2_1 = torch.tensor(self.prior_sigma_1 ** 2, device=mu.device)
+        prior_sigma2_2 = torch.tensor(self.prior_sigma_2 ** 2, device=mu.device)
+        prior_pi = torch.tensor(self.prior_pi, device=mu.device)
         
-        kl_component_1 = torch.log(self.prior_pi / torch.sqrt(prior_sigma2_1) + 
-                                  (1 - self.prior_pi) / torch.sqrt(prior_sigma2_2))
+        # Calculate components for the KL divergence formula
+        kl_component_1 = torch.log(prior_pi / torch.sqrt(prior_sigma2_1) + 
+                                  (1 - prior_pi) / torch.sqrt(prior_sigma2_2))
         kl_component_1 -= torch.log(1.0 / torch.sqrt(sigma2))
         
         kl_component_2 = 0.5 * (log_sigma2 + (mu ** 2 + sigma2) / prior_sigma2_1)
         kl_component_3 = 0.5 * (log_sigma2 + (mu ** 2 + sigma2) / prior_sigma2_2)
         
+        # Logsumexp for numerical stability
+        # We directly calculate log(π * exp(-0.5 * ((μ²+σ²)/σ₁² + log(σ₁²))) + (1-π) * exp(-0.5 * ((μ²+σ²)/σ₂² + log(σ₂²))))
         kl_component_mix = torch.logsumexp(
             torch.stack([
-                torch.log(torch.tensor(self.prior_pi)) - kl_component_2,
-                torch.log(torch.tensor(1 - self.prior_pi)) - kl_component_3
+                torch.log(prior_pi) - kl_component_2,
+                torch.log(1 - prior_pi) - kl_component_3
             ]),
             dim=0
         )
