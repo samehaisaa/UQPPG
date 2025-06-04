@@ -70,7 +70,7 @@ def add_args(parser):
     return parser
 
 
-def train_and_test(config, data_loader_dict):
+def train_and_test(config, args, data_loader_dict):
     """Trains the model."""
     if config.MODEL.NAME == "Physnet":
         model_trainer = trainer.PhysnetTrainer.PhysnetTrainer(config, data_loader_dict)
@@ -78,15 +78,15 @@ def train_and_test(config, data_loader_dict):
         model_trainer = trainer.iBVPNetTrainer.iBVPNetTrainer(config, data_loader_dict)
     elif config.MODEL.NAME == "FactorizePhys":
         # Add BNN args to config if provided via command line
-        if hasattr(config, 'enable_bnn') and config.enable_bnn:
-            if 'FactorizePhys' not in config.MODEL:
-                config.MODEL.FactorizePhys = {}
-            config.MODEL.FactorizePhys['enable_bnn'] = config.enable_bnn
-            config.MODEL.FactorizePhys['bnn_kl_weight'] = config.bnn_kl_weight
-            config.MODEL.FactorizePhys['bnn_prior_sigma_1'] = config.bnn_prior_sigma_1
-            config.MODEL.FactorizePhys['bnn_prior_sigma_2'] = config.bnn_prior_sigma_2
-            config.MODEL.FactorizePhys['bnn_prior_pi'] = config.bnn_prior_pi
-            config.MODEL.FactorizePhys['bnn_samples'] = config.bnn_samples
+        if args.enable_bnn:
+            config.defrost()
+            config.MODEL.FactorizePhys.enable_bnn = True
+            config.MODEL.FactorizePhys.bnn_kl_weight = args.bnn_kl_weight
+            config.MODEL.FactorizePhys.bnn_prior_sigma_1 = args.bnn_prior_sigma_1
+            config.MODEL.FactorizePhys.bnn_prior_sigma_2 = args.bnn_prior_sigma_2
+            config.MODEL.FactorizePhys.bnn_prior_pi = args.bnn_prior_pi
+            config.MODEL.FactorizePhys.bnn_samples = args.bnn_samples
+            config.freeze()
             print("Enabling BNN from command line arguments")
             
         model_trainer = trainer.FactorizePhysTrainer.FactorizePhysTrainer(config, data_loader_dict)
@@ -110,7 +110,7 @@ def train_and_test(config, data_loader_dict):
     model_trainer.test(data_loader_dict)
 
 
-def test(config, data_loader_dict):
+def test(config, args, data_loader_dict):
     """Tests the model."""
     if config.MODEL.NAME == "Physnet":
         model_trainer = trainer.PhysnetTrainer.PhysnetTrainer(config, data_loader_dict)
@@ -118,15 +118,15 @@ def test(config, data_loader_dict):
         model_trainer = trainer.iBVPNetTrainer.iBVPNetTrainer(config, data_loader_dict)    
     elif config.MODEL.NAME == "FactorizePhys":
         # Add BNN args to config if provided via command line
-        if hasattr(config, 'enable_bnn') and config.enable_bnn:
-            if 'FactorizePhys' not in config.MODEL:
-                config.MODEL.FactorizePhys = {}
-            config.MODEL.FactorizePhys['enable_bnn'] = config.enable_bnn
-            config.MODEL.FactorizePhys['bnn_kl_weight'] = config.bnn_kl_weight
-            config.MODEL.FactorizePhys['bnn_prior_sigma_1'] = config.bnn_prior_sigma_1
-            config.MODEL.FactorizePhys['bnn_prior_sigma_2'] = config.bnn_prior_sigma_2
-            config.MODEL.FactorizePhys['bnn_prior_pi'] = config.bnn_prior_pi
-            config.MODEL.FactorizePhys['bnn_samples'] = config.bnn_samples
+        if args.enable_bnn:
+            config.defrost()
+            config.MODEL.FactorizePhys.enable_bnn = True
+            config.MODEL.FactorizePhys.bnn_kl_weight = args.bnn_kl_weight
+            config.MODEL.FactorizePhys.bnn_prior_sigma_1 = args.bnn_prior_sigma_1
+            config.MODEL.FactorizePhys.bnn_prior_sigma_2 = args.bnn_prior_sigma_2
+            config.MODEL.FactorizePhys.bnn_prior_pi = args.bnn_prior_pi
+            config.MODEL.FactorizePhys.bnn_samples = args.bnn_samples
+            config.freeze()
             print("Enabling BNN from command line arguments")
             
         model_trainer = trainer.FactorizePhysTrainer.FactorizePhysTrainer(config, data_loader_dict)
@@ -191,10 +191,6 @@ if __name__ == "__main__":
     # configurations.
     config = get_config(args)
     
-    # Add command line arguments to config
-    for arg in vars(args):
-        setattr(config, arg, getattr(args, arg))
-        
     print('Configuration:')
     print(config, end='\n\n')
 
@@ -365,9 +361,9 @@ if __name__ == "__main__":
         raise ValueError("Unsupported toolbox_mode! Currently support train_and_test or only_test or unsupervised_method.")
 
     if config.TOOLBOX_MODE == "train_and_test":
-        train_and_test(config, data_loader_dict)
+        train_and_test(config, args, data_loader_dict)
     elif config.TOOLBOX_MODE == "only_test":
-        test(config, data_loader_dict)
+        test(config, args, data_loader_dict)
     elif config.TOOLBOX_MODE == "unsupervised_method":
         unsupervised_method_inference(config, data_loader_dict)
     else:
