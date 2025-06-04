@@ -317,6 +317,12 @@ _C.MODEL.FactorizePhys.MD_S = 1
 _C.MODEL.FactorizePhys.MD_STEPS = 4
 _C.MODEL.FactorizePhys.MD_INFERENCE = True
 _C.MODEL.FactorizePhys.MD_RESIDUAL = True
+_C.MODEL.FactorizePhys.enable_bnn = False
+_C.MODEL.FactorizePhys.bnn_prior_sigma_1 = 1.0
+_C.MODEL.FactorizePhys.bnn_prior_sigma_2 = 0.002
+_C.MODEL.FactorizePhys.bnn_prior_pi = 0.5
+_C.MODEL.FactorizePhys.bnn_kl_weight = 1e-6
+_C.MODEL.FactorizePhys.bnn_samples = 10
 
 # -----------------------------------------------------------------------------
 # Model Settings for TS-CAN
