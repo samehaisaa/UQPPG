@@ -70,7 +70,7 @@ TEST:
   DATA:
     FS: 30
     DATASET: PURE
-    DO_PREPROCESS: true            # if first time, should be true
+    DO_PREPROCESS: False            # if first time, should be true
     DATA_FORMAT: NCDHW
     DATA_PATH: "/kaggle/input/pure-rppg-research"                     # Raw dataset path, need to be updated
     CACHED_PATH: "Cached"    # Processed dataset save path, need to be updated
