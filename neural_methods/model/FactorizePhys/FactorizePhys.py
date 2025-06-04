@@ -154,13 +154,6 @@ class rPPG_FeatureExtractor(nn.Module):
         voxel_embeddings = self.dropout2(x)
         
         return voxel_embeddings
-    
-    def monte_carlo_forward(self, x, n_samples=10):
-        """Run multiple forward passes for uncertainty estimation"""
-        samples = []
-        for _ in range(n_samples):
-            samples.append(self.forward(x))
-        return samples
 
 
 class BVP_Head(nn.Module):
@@ -421,11 +414,18 @@ class FactorizePhys(nn.Module):
     def monte_carlo_forward(self, x, n_samples=10):
         """Run multiple forward passes for uncertainty estimation"""
         samples = []
+        [batch, channel, length, width, height] = x.shape
+        
         for _ in range(n_samples):
             if self.use_fsam:
                 rPPG, _, _ = self.forward(x)
             else:
                 rPPG = self.forward(x)
+                
+            # Ensure predictions match the input temporal length
+            if rPPG.shape[1] > length:
+                rPPG = rPPG[:, :length]
+                
             samples.append(rPPG.detach().cpu())
         return samples
     
