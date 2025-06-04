@@ -30,10 +30,30 @@ class BayesianConv3d(ModuleWrapper):
         # Register layer parameters
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size,) * 3
-        self.stride = stride if isinstance(stride, tuple) else (stride,) * 3
-        self.padding = padding if isinstance(padding, tuple) else (padding,) * 3
-        self.dilation = dilation if isinstance(dilation, tuple) else (dilation,) * 3
+        if isinstance(kernel_size, tuple):
+            self.kernel_size = kernel_size
+        elif isinstance(kernel_size, list):
+            self.kernel_size = tuple(kernel_size)
+        else:
+            self.kernel_size = (kernel_size,) * 3
+        if isinstance(stride, tuple):
+            self.stride = stride
+        elif isinstance(stride, list):
+            self.stride = tuple(stride)
+        else:
+            self.stride = (stride,) * 3
+        if isinstance(padding, tuple):
+            self.padding = padding
+        elif isinstance(padding, list):
+            self.padding = tuple(padding)
+        else:
+            self.padding = (padding,) * 3
+        if isinstance(dilation, tuple):
+            self.dilation = dilation
+        elif isinstance(dilation, list):
+            self.dilation = tuple(dilation)
+        else:
+            self.dilation = (dilation,) * 3
         self.groups = 1
         self.has_bias = bias
         
