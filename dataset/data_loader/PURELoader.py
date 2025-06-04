@@ -52,7 +52,11 @@ class PURELoader(BaseLoader):
             raise ValueError(self.dataset_name + " data paths empty!")
         dirs = list()
         for data_dir in data_dirs:
-            subject_trail_val = os.path.split(data_dir)[-1].replace('-', '')
+            dir_name = os.path.split(data_dir)[-1]
+            # Skip if it doesn't match the expected pattern (e.g., skip datasetmetadata.json)
+            if not re.match(r'^\d+-\d+$', dir_name):
+                continue
+            subject_trail_val = dir_name.replace('-', '')
             index = int(subject_trail_val)
             subject = int(subject_trail_val[0:2])
             dirs.append({"index": index, "path": data_dir, "subject": subject})
